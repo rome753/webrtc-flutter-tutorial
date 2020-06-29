@@ -17,35 +17,27 @@ public class SurfacePlatformViewFactory extends PlatformViewFactory {
     public static String PLUGIN_VIEW_TYPE_SURFACE = "view_type_surface";
 
     private BinaryMessenger binaryMessenger;
-    private SurfacePlatformView surfacePlatformView;
+    private View surfaceView;
 
-    public SurfacePlatformViewFactory(BinaryMessenger binaryMessenger) {
+    public SurfacePlatformViewFactory(BinaryMessenger binaryMessenger, View surfaceView) {
         super(StandardMessageCodec.INSTANCE);
         this.binaryMessenger = binaryMessenger;
+        this.surfaceView = surfaceView;
         Log.d("chao", "SurfacePlatformViewFactory init");
     }
 
     @Override
     public PlatformView create(Context context, int viewId, Object args) {
         Log.d("chao", "SurfacePlatformViewFactory create");
-        surfacePlatformView = new SurfacePlatformView(context, binaryMessenger, viewId);
-        return surfacePlatformView;
+        return new SurfacePlatformView(context, binaryMessenger, viewId, surfaceView);
     }
 
-    public View getSurfaceView() {
-        Log.d("chao", "SurfacePlatformViewFactory getSurfaceView");
-        return surfacePlatformView == null ? null : surfacePlatformView.getView();
-    }
-
-    public static SurfacePlatformViewFactory registerView(ShimPluginRegistry pluginRegistry) {
+    public static void registerView(ShimPluginRegistry pluginRegistry, View surfaceView) {
         Log.d("chao", "SurfacePlatformViewFactory registerView");
         if (!pluginRegistry.hasPlugin(PLUGIN_KEY_SURFACE)) {
             PluginRegistry.Registrar registrar = pluginRegistry.registrarFor(PLUGIN_KEY_SURFACE);
-            SurfacePlatformViewFactory platformViewFactory = new SurfacePlatformViewFactory(registrar.messenger());
-            registrar.platformViewRegistry().registerViewFactory(PLUGIN_VIEW_TYPE_SURFACE, platformViewFactory);
-            return platformViewFactory;
+            registrar.platformViewRegistry().registerViewFactory(PLUGIN_VIEW_TYPE_SURFACE, new SurfacePlatformViewFactory(registrar.messenger(), surfaceView));
         }
-        return null;
     }
 
 }

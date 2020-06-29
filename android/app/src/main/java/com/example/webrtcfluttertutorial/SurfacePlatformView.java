@@ -17,15 +17,15 @@ import io.flutter.plugin.platform.PlatformView;
 public class SurfacePlatformView implements PlatformView, MethodChannel.MethodCallHandler {
 
     private static final String METHOD_CHANNEL_NAME = "MessagePlatformMethodChannel";
-    private SurfaceViewRenderer surfaceViewRenderer;
+    private View surfaceView;
     private final MethodChannel methodChannel;
 
-    public SurfacePlatformView(Context context, BinaryMessenger messenger, int id) {
+    public SurfacePlatformView(Context context, BinaryMessenger messenger, int id, View surfaceView) {
         Log.d("chao", "SurfacePlatformView init");
         methodChannel = new MethodChannel(messenger, METHOD_CHANNEL_NAME);
         methodChannel.setMethodCallHandler(this);
 
-        surfaceViewRenderer = new SurfaceViewRenderer(context);
+        this.surfaceView = surfaceView;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class SurfacePlatformView implements PlatformView, MethodChannel.MethodCa
     @Override
     public View getView() {
         Log.d("chao", "SurfacePlatformView getView");
-        return surfaceViewRenderer;
+        return surfaceView;
     }
 
     @Override

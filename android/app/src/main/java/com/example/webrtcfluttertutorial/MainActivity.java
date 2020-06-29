@@ -20,21 +20,20 @@ import org.webrtc.VideoTrack;
 
 public class MainActivity extends FlutterActivity {
 
-    SurfacePlatformViewFactory surfacePlatformViewFactory;
+    SurfaceViewRenderer surfaceViewRenderer;
 
     @Override
     public void configureFlutterEngine(FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
+        surfaceViewRenderer = new SurfaceViewRenderer(this);
         try {
             ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
-            surfacePlatformViewFactory = SurfacePlatformViewFactory.registerView(shimPluginRegistry);
+            SurfacePlatformViewFactory.registerView(shimPluginRegistry, surfaceViewRenderer);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        new Handler().postDelayed(()->{
-            initWebRTC();
-        }, 5000);
+        initWebRTC();
 
     }
 
@@ -58,7 +57,7 @@ public class MainActivity extends FlutterActivity {
         videoCapturer.initialize(surfaceTextureHelper, getApplicationContext(), videoSource.getCapturerObserver());
         videoCapturer.startCapture(480, 640, 30);
 
-        SurfaceViewRenderer localView = (SurfaceViewRenderer) surfacePlatformViewFactory.getSurfaceView();
+        SurfaceViewRenderer localView = surfaceViewRenderer;
         localView.setMirror(true);
         localView.init(eglBaseContext, null);
 
