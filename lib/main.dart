@@ -80,8 +80,16 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: <Widget>[
           AndroidView(
-            viewType: 'view_type_surface',
+            viewType: 'view_type_remote_surface',
             onPlatformViewCreated: platFromViewCreate,
+          ),
+          Container(
+            width: 200,
+            height: 300,
+            child: AndroidView(
+              viewType: 'view_type_surface',
+              onPlatformViewCreated: platFromViewCreate,
+            ),
           ),
         ],
       ),
