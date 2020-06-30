@@ -16,12 +16,10 @@ public class SurfacePlatformViewFactory extends PlatformViewFactory {
     public static String PLUGIN_KEY_SURFACE = "plugin_key_surface";
     public static String PLUGIN_VIEW_TYPE_SURFACE = "view_type_surface";
 
-    private BinaryMessenger binaryMessenger;
     private View surfaceView;
 
-    public SurfacePlatformViewFactory(BinaryMessenger binaryMessenger, View surfaceView) {
+    public SurfacePlatformViewFactory(View surfaceView) {
         super(StandardMessageCodec.INSTANCE);
-        this.binaryMessenger = binaryMessenger;
         this.surfaceView = surfaceView;
         Log.d("chao", "SurfacePlatformViewFactory init");
     }
@@ -29,14 +27,14 @@ public class SurfacePlatformViewFactory extends PlatformViewFactory {
     @Override
     public PlatformView create(Context context, int viewId, Object args) {
         Log.d("chao", "SurfacePlatformViewFactory create");
-        return new SurfacePlatformView(context, binaryMessenger, viewId, surfaceView);
+        return new SurfacePlatformView(surfaceView);
     }
 
     public static void registerView(ShimPluginRegistry pluginRegistry, View surfaceView) {
         Log.d("chao", "SurfacePlatformViewFactory registerView");
         if (!pluginRegistry.hasPlugin(PLUGIN_KEY_SURFACE)) {
             PluginRegistry.Registrar registrar = pluginRegistry.registrarFor(PLUGIN_KEY_SURFACE);
-            registrar.platformViewRegistry().registerViewFactory(PLUGIN_VIEW_TYPE_SURFACE, new SurfacePlatformViewFactory(registrar.messenger(), surfaceView));
+            registrar.platformViewRegistry().registerViewFactory(PLUGIN_VIEW_TYPE_SURFACE, new SurfacePlatformViewFactory(surfaceView));
         }
     }
 
