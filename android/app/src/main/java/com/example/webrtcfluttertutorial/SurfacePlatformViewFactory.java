@@ -30,12 +30,14 @@ public class SurfacePlatformViewFactory extends PlatformViewFactory {
         return new SurfacePlatformView(surfaceView);
     }
 
-    public static void registerView(ShimPluginRegistry pluginRegistry, View surfaceView) {
+    public static BinaryMessenger registerView(ShimPluginRegistry pluginRegistry, View surfaceView) {
         Log.d("chao", "SurfacePlatformViewFactory registerView");
         if (!pluginRegistry.hasPlugin(PLUGIN_KEY_SURFACE)) {
             PluginRegistry.Registrar registrar = pluginRegistry.registrarFor(PLUGIN_KEY_SURFACE);
             registrar.platformViewRegistry().registerViewFactory(PLUGIN_VIEW_TYPE_SURFACE, new SurfacePlatformViewFactory(surfaceView));
+            return registrar.messenger();
         }
+        return null;
     }
 
 }

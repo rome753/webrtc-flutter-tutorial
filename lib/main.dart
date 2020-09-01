@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(MyApp());
@@ -49,16 +50,18 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+const platform = const MethodChannel("webrtc_control");
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  String getViewType(bool isLocalView) {
+    return isLocalView ? "view_type_surface" : "view_type_remote_surface";
+  }
+
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
+      platform.invokeMethod("swap_video");
       _counter++;
     });
   }
@@ -80,17 +83,17 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: <Widget>[
           AndroidView(
-            viewType: 'view_type_remote_surface',
+            viewType: "view_type_surface",
             onPlatformViewCreated: platFromViewCreate,
           ),
-          Container(
-            width: 200,
-            height: 300,
-            child: AndroidView(
-              viewType: 'view_type_surface',
-              onPlatformViewCreated: platFromViewCreate,
-            ),
-          ),
+//          Container(
+//            width: 200,
+//            height: 300,
+//            child: AndroidView(
+//              viewType: getViewType(!isSwap),
+//              onPlatformViewCreated: platFromViewCreate,
+//            ),
+//          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

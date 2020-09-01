@@ -1,10 +1,20 @@
 package com.example.webrtcfluttertutorial;
 
 import android.os.Handler;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
+import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.MethodChannel;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
@@ -24,6 +34,7 @@ import org.webrtc.VideoCapturer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,21 +48,63 @@ public class MainActivity extends FlutterActivity {
     MediaStream mediaStreamLocal;
     MediaStream mediaStreamRemote;
 
+    FrameLayout videoLayout;
+    FrameLayout.LayoutParams fullScreenParams;
+    FrameLayout.LayoutParams widgetParams;
+    boolean isLocalFullScreen = false;
+
     @Override
     public void configureFlutterEngine(FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
+
         localView = new SurfaceViewRenderer(this);
         remoteView = new SurfaceViewRenderer(this);
+
+        videoLayout = new FrameLayout(this);
+        fullScreenParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        widgetParams = new FrameLayout.LayoutParams(
+                400,
+                600
+        );
+        videoLayout.addView(localView);
+        videoLayout.addView(remoteView);
+        setVideoLayoutParams();
+
         try {
             ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
-            SurfacePlatformViewFactory.registerView(shimPluginRegistry, localView);
-            RemoteSurfacePlatformViewFactory.registerView(shimPluginRegistry, remoteView);
+            BinaryMessenger binaryMessenger = SurfacePlatformViewFactory.registerView(shimPluginRegistry, videoLayout);
+            MethodChannel methodChannel = new MethodChannel(binaryMessenger, "webrtc_control");
+            methodChannel.setMethodCallHandler(new MethodChannel.MethodCallHandler() {
+                @Override
+                public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+                    Log.d("chao", "onMethodCall " + call.method + " thread " + Thread.currentThread().getName());
+                    if (TextUtils.equals(call.method, "swap_video")) {
+                        swap();
+                    }
+                }
+            });
+
+//            RemoteSurfacePlatformViewFactory.registerView(shimPluginRegistry, remoteView);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         initWebRTC();
+    }
 
+    public void setVideoLayoutParams() {
+        localView.setLayoutParams(isLocalFullScreen ? fullScreenParams : widgetParams);
+        remoteView.setLayoutParams(!isLocalFullScreen ? fullScreenParams : widgetParams);
+        localView.setZOrderMediaOverlay(!isLocalFullScreen);
+        remoteView.setZOrderMediaOverlay(isLocalFullScreen);
+    }
+
+    public void swap() {
+        isLocalFullScreen = !isLocalFullScreen;
+        setVideoLayoutParams();
     }
 
     private void initWebRTC() {
